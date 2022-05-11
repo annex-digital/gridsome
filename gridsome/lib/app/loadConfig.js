@@ -96,7 +96,7 @@ module.exports = (context, options = {}) => {
   config.filesDir = path.join(config.assetsDir, 'files')
   config.dataDir = path.join(config.assetsDir, 'data')
   config.appPath = path.resolve(__dirname, '../../app')
-  config.tmpDir = resolve('src/.temp')
+  config.tmpDir = resolve(localConfig.tmpDir || 'src/.temp')
   config.cacheDir = resolve('.cache')
   config.imageCacheDir = resolve('.cache', assetsDir, 'static')
   config.maxImageWidth = localConfig.maxImageWidth || 2560
@@ -169,7 +169,7 @@ module.exports = (context, options = {}) => {
   return Object.freeze(config)
 }
 
-function resolveEnv (context) {
+function resolveEnv(context) {
   const env = process.env.NODE_ENV || 'development'
   const envPath = path.resolve(context, '.env')
   const envPathByMode = path.resolve(context, `.env.${env}`)
@@ -187,9 +187,9 @@ function resolveEnv (context) {
   return parsed
 }
 
-function resolvePkg (context) {
+function resolvePkg(context) {
   const pkgPath = path.resolve(context, 'package.json')
-  let pkg = { dependencies: {}, devDependencies: {}}
+  let pkg = { dependencies: {}, devDependencies: {} }
 
   try {
     const content = fs.readFileSync(pkgPath, 'utf-8')
@@ -213,7 +213,7 @@ function resolvePkg (context) {
   return pkg
 }
 
-function normalizePathPrefix (pathPrefix = '') {
+function normalizePathPrefix(pathPrefix = '') {
   const segments = pathPrefix.split('/').filter(s => !!s)
   return segments.length ? `/${segments.join('/')}` : ''
 }
@@ -230,8 +230,8 @@ const template = Joi.object()
     component: Joi.string().required()
   })
 
-function normalizeTemplates (context, config, localConfig) {
-  const { templates = {}} = localConfig
+function normalizeTemplates(context, config, localConfig) {
+  const { templates = {} } = localConfig
   const { templatesDir } = config
   const res = {}
 
@@ -301,7 +301,7 @@ function normalizeTemplates (context, config, localConfig) {
   return res
 }
 
-function normalizePlugins (context, plugins) {
+function normalizePlugins(context, plugins) {
   return plugins.filter(Boolean).map((plugin, index) => {
     if (typeof plugin !== 'object') {
       plugin = { use: plugin }
@@ -331,7 +331,7 @@ const redirect = Joi.object()
     status: Joi.number().integer().default(301)
   })
 
-function normalizeRedirects (config) {
+function normalizeRedirects(config) {
   const redirects = []
 
   if (Array.isArray(config.redirects)) {
@@ -373,7 +373,7 @@ const permalinksSchema = Joi.object()
       .allow(false)
   })
 
-function normalizePermalinks (permalinks = {}) {
+function normalizePermalinks(permalinks = {}) {
   const { error, value } = Joi.validate(permalinks, permalinksSchema)
 
   if (error) {
@@ -383,13 +383,13 @@ function normalizePermalinks (permalinks = {}) {
   if (value.slugify && typeof value.slugify.use === 'string') {
     value.slugify.use = require(value.slugify.use)
   } else if (typeof value.slugify === 'function') {
-    value.slugify = { use: value.slugify, options: {}}
+    value.slugify = { use: value.slugify, options: {} }
   }
 
   return Object.freeze(value)
 }
 
-function resolvePluginEntries (id, context) {
+function resolvePluginEntries(id, context) {
   let dirName = ''
 
   if (typeof id === 'function') {
@@ -426,8 +426,8 @@ function resolvePluginEntries (id, context) {
   })
 }
 
-function resolveTransformers (pkg, config) {
-  const { dependencies = {}, devDependencies = {}} = pkg
+function resolveTransformers(pkg, config) {
+  const { dependencies = {}, devDependencies = {} } = pkg
   const deps = Object.keys({
     ...dependencies,
     ...devDependencies
@@ -463,7 +463,7 @@ function resolveTransformers (pkg, config) {
   return result
 }
 
-function normalizeIconsConfig (config = {}) {
+function normalizeIconsConfig(config = {}) {
   const res = {}
 
   const faviconSizes = [16, 32, 96]
